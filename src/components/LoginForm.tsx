@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import RegisterModal, { RegisterFormData } from './RegisterModal';
 
 /**
  * Interface para os dados do formulário de login
@@ -16,7 +17,7 @@ interface LoginFormData {
 interface LoginFormProps {
   onSubmit?: (data: LoginFormData) => void;
   onForgotPassword?: () => void;
-  onCreateAccount?: () => void;
+  onCreateAccount?: (data: RegisterFormData) => void;
 }
 
 /**
@@ -33,6 +34,18 @@ const LoginForm = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  /**
+   * Handler para criação de conta
+   */
+  const handleCreateAccount = (data: RegisterFormData) => {
+    if (onCreateAccount) {
+      onCreateAccount(data);
+    }
+    // TODO: Implementar lógica de registro
+    console.log('Account created:', data);
+  };
 
   /**
    * Handler do submit do formulário
@@ -169,13 +182,20 @@ const LoginForm = ({
         <span className="hidden sm:block text-border">|</span>
         <button
           type="button"
-          onClick={onCreateAccount}
+          onClick={() => setIsRegisterModalOpen(true)}
           className="text-sm text-muted-foreground hover:text-foreground 
                      noai-link transition-colors"
         >
           Criar conta
         </button>
       </div>
+
+      {/* Modal de Registro */}
+      <RegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSubmit={handleCreateAccount}
+      />
     </form>
   );
 };
