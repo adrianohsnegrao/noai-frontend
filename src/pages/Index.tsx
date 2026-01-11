@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import LoginForm from '@/components/LoginForm';
 import Footer from '@/components/Footer';
 
@@ -6,20 +7,22 @@ import Footer from '@/components/Footer';
  * Design minimalista, futurista e 100% responsivo
  */
 const Index = () => {
+  const navigate = useNavigate();
+
   /**
    * Handler para submit do login
    * Preparado para integração com API de autenticação
    */
   const handleLogin = async (data: { email: string; password: string }) => {
-    // TODO: Implementar integração com API de autenticação
     console.log('Login data:', data);
+
+    navigate('/home');
   };
 
   /**
    * Handler para "Esqueci minha senha"
    */
   const handleForgotPassword = () => {
-    // TODO: Navegar para página de recuperação de senha
     console.log('Navigate to forgot password');
   };
 
@@ -27,7 +30,6 @@ const Index = () => {
    * Handler para "Criar conta"
    */
   const handleCreateAccount = () => {
-    // TODO: Navegar para página de criação de conta
     console.log('Navigate to create account');
   };
 
