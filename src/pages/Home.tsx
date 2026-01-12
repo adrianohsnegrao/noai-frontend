@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/Sidebar';
 import Timeline from '@/components/Timeline';
 import PostComposer from '@/components/PostComposer';
+import { Comment } from '@/components/CommentSection';
 
 interface TimelinePost {
   id: string;
@@ -115,6 +116,82 @@ const Home = () => {
     return mockPosts;
   }, []);
 
+  const handleLikeToggle = async (postId: string, isLiked: boolean): Promise<void> => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    console.log(`Post ${postId} ${isLiked ? 'liked' : 'unliked'}`);
+  };
+
+  const handleAddComment = async (postId: string, content: string): Promise<void> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log(`Comment added to post ${postId}:`, content);
+  };
+
+  const handleDeleteComment = async (commentId: string): Promise<void> => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    console.log(`Comment ${commentId} deleted`);
+  };
+
+  const handleLoadComments = async (postId: string): Promise<Comment[]> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const mockComments: Record<string, Comment[]> = {
+      '1': [
+        {
+          id: 'c1',
+          content: 'This is exactly what I was looking for!',
+          created_at: new Date(Date.now() - 1000 * 60 * 3).toISOString(),
+          user_id: 'user-3',
+          user_name: 'Bob Johnson',
+          user_avatar: undefined,
+        },
+        {
+          id: 'c2',
+          content: 'Love the focus on human connections rather than algorithms.',
+          created_at: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
+          user_id: 'user-4',
+          user_name: 'Carol Williams',
+          user_avatar: undefined,
+        },
+      ],
+      '2': [
+        {
+          id: 'c3',
+          content: 'Same here! Met some amazing people through this platform.',
+          created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+          user_id: 'user-2',
+          user_name: 'Alice Smith',
+          user_avatar: undefined,
+        },
+      ],
+      '3': [],
+      '4': [
+        {
+          id: 'c4',
+          content: 'Totally agree! Finally a breath of fresh air.',
+          created_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+          user_id: 'user-2',
+          user_name: 'Alice Smith',
+          user_avatar: undefined,
+        },
+      ],
+    };
+
+    return mockComments[postId] || [];
+  };
+
+  const handleLoadLikes = async (postId: string): Promise<{ count: number; isLiked: boolean }> => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const mockLikes: Record<string, { count: number; isLiked: boolean }> = {
+      '1': { count: 12, isLiked: false },
+      '2': { count: 8, isLiked: true },
+      '3': { count: 15, isLiked: false },
+      '4': { count: 6, isLiked: false },
+    };
+
+    return mockLikes[postId] || { count: 0, isLiked: false };
+  };
+
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar
@@ -137,9 +214,17 @@ const Home = () => {
           <PostComposer user={currentUser} onPost={handleCreatePost} />
 
           <Timeline
+            currentUserId={currentUser.id}
+            currentUserName={currentUser.full_name}
+            currentUserAvatar={currentUser.avatar_url}
             onUserClick={handleNavigateToProfile}
             fetchPosts={fetchPosts}
             posts={posts}
+            onLikeToggle={handleLikeToggle}
+            onAddComment={handleAddComment}
+            onDeleteComment={handleDeleteComment}
+            onLoadComments={handleLoadComments}
+            onLoadLikes={handleLoadLikes}
           />
         </div>
       </main>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import Post from './Post';
+import { Comment } from './CommentSection';
 
 interface TimelinePost {
   id: string;
@@ -14,15 +15,36 @@ interface TimelinePost {
 }
 
 interface TimelineProps {
+  currentUserId: string;
+  currentUserName: string;
+  currentUserAvatar?: string;
   onUserClick: (userId: string) => void;
   fetchPosts: () => Promise<TimelinePost[]>;
   posts?: TimelinePost[];
+  onLikeToggle: (postId: string, isLiked: boolean) => Promise<void>;
+  onAddComment: (postId: string, content: string) => Promise<void>;
+  onDeleteComment: (commentId: string) => Promise<void>;
+  onLoadComments: (postId: string) => Promise<Comment[]>;
+  onLoadLikes: (postId: string) => Promise<{ count: number; isLiked: boolean }>;
 }
 
-const Timeline = ({ onUserClick, fetchPosts, posts: externalPosts }: TimelineProps) => {
+const Timeline = ({
+  currentUserId,
+  currentUserName,
+  currentUserAvatar,
+  onUserClick,
+  fetchPosts,
+  posts: externalPosts,
+  onLikeToggle,
+  onAddComment,
+  onDeleteComment,
+  onLoadComments,
+  onLoadLikes,
+}: TimelineProps) => {
   const [internalPosts, setInternalPosts] = useState<TimelinePost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [postLikes, setPostLikes] = useState<Record<string, { count: number; isLiked: boolean }>>({});
 
   const posts = externalPosts && externalPosts.length > 0 ? externalPosts : internalPosts;
 
@@ -36,6 +58,19 @@ const Timeline = ({ onUserClick, fetchPosts, posts: externalPosts }: TimelinePro
       setError(null);
       const data = await fetchPosts();
       setInternalPosts(data);
+
+      const likesMap: Record<string, { count: number; isLiked: boolean }> = {};
+      await Promise.all(
+        data.map(async (post) => {
+          try {
+            likesMap[post.id] = await onLoadLikes(post.id);
+          } catch (err) {
+            console.error(`Failed to load likes for post ${post.id}:`, err);
+            likesMap[post.id] = { count: 0, isLiked: false };
+          }
+        })
+      );
+      setPostLikes(likesMap);
     } catch (err) {
       console.error('Error loading posts:', err);
       setError('Failed to load posts. Please try again.');
@@ -88,7 +123,20 @@ const Timeline = ({ onUserClick, fetchPosts, posts: externalPosts }: TimelinePro
   return (
     <div className="space-y-4">
       {posts.map((post) => (
-        <Post key={post.id} post={post} onUserClick={onUserClick} />
+        <Post
+          key={post.id}
+          post={post}
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          currentUserAvatar={currentUserAvatar}
+          initialLikeCount={postLikes[post.id]?.count || 0}
+          initialIsLiked={postLikes[post.id]?.isLiked || false}
+          onUserClick={onUserClick}
+          onLikeToggle={onLikeToggle}
+          onAddComment={onAddComment}
+          onDeleteComment={onDeleteComment}
+          onLoadComments={onLoadComments}
+        />
       ))}
     </div>
   );

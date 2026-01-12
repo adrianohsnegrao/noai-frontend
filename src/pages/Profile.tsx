@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import ProfileHeader from '@/components/ProfileHeader';
 import Timeline from '@/components/Timeline';
+import { Comment } from '@/components/CommentSection';
 
 interface UserProfile {
   id: string;
@@ -186,6 +187,72 @@ const Profile = () => {
     navigate('/');
   };
 
+  const handleLikeToggle = async (postId: string, isLiked: boolean): Promise<void> => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    console.log(`Post ${postId} ${isLiked ? 'liked' : 'unliked'}`);
+  };
+
+  const handleAddComment = async (postId: string, content: string): Promise<void> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log(`Comment added to post ${postId}:`, content);
+  };
+
+  const handleDeleteComment = async (commentId: string): Promise<void> => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    console.log(`Comment ${commentId} deleted`);
+  };
+
+  const handleLoadComments = async (postId: string): Promise<Comment[]> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const mockComments: Record<string, Comment[]> = {
+      '1': [
+        {
+          id: 'pc1',
+          content: 'Great project! Looking forward to seeing it.',
+          created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+          user_id: 'user-2',
+          user_name: 'Alice Smith',
+          user_avatar: undefined,
+        },
+      ],
+      '2': [
+        {
+          id: 'pc2',
+          content: 'So true! Real connections are everything.',
+          created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+          user_id: 'user-3',
+          user_name: 'Bob Johnson',
+          user_avatar: undefined,
+        },
+      ],
+      '3': [
+        {
+          id: 'pc3',
+          content: 'Same here! This platform is amazing.',
+          created_at: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(),
+          user_id: 'user-4',
+          user_name: 'Carol Williams',
+          user_avatar: undefined,
+        },
+      ],
+    };
+
+    return mockComments[postId] || [];
+  };
+
+  const handleLoadLikes = async (postId: string): Promise<{ count: number; isLiked: boolean }> => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const mockLikes: Record<string, { count: number; isLiked: boolean }> = {
+      '1': { count: 24, isLiked: false },
+      '2': { count: 18, isLiked: true },
+      '3': { count: 31, isLiked: false },
+    };
+
+    return mockLikes[postId] || { count: 0, isLiked: false };
+  };
+
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar
@@ -233,8 +300,16 @@ const Profile = () => {
               <section>
                 <h3 className="text-lg font-medium text-foreground mb-4">Posts</h3>
                 <Timeline
+                  currentUserId={currentUser.id}
+                  currentUserName={currentUser.full_name}
+                  currentUserAvatar={currentUser.avatar_url}
                   onUserClick={handleNavigateToProfile}
                   fetchPosts={fetchUserPosts}
+                  onLikeToggle={handleLikeToggle}
+                  onAddComment={handleAddComment}
+                  onDeleteComment={handleDeleteComment}
+                  onLoadComments={handleLoadComments}
+                  onLoadLikes={handleLoadLikes}
                 />
               </section>
             </div>
