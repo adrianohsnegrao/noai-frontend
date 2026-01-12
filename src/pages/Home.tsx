@@ -35,7 +35,7 @@ const Home = () => {
   }, [navigate]);
 
   const handleNavigateToProfile = (userId: string) => {
-    console.log('Navigate to profile:', userId);
+    navigate(`/profile/${userId}`);
   };
 
   const handleLogout = () => {
