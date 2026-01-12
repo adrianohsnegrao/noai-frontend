@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/Sidebar';
 import Timeline from '@/components/Timeline';
+import PostComposer from '@/components/PostComposer';
 
 interface TimelinePost {
   id: string;
@@ -16,6 +17,7 @@ interface TimelinePost {
 
 const Home = () => {
   const navigate = useNavigate();
+  const [posts, setPosts] = useState<TimelinePost[]>([]);
   const [currentUser] = useState({
     id: 'user-1',
     full_name: 'John Doe',
@@ -43,10 +45,30 @@ const Home = () => {
     navigate('/');
   };
 
-  const fetchPosts = async (): Promise<TimelinePost[]> => {
+  const handleCreatePost = async (content: string): Promise<void> => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Mock response - in production this would come from the API
+    const newPost: TimelinePost = {
+      id: `post-${Date.now()}`,
+      content,
+      created_at: new Date().toISOString(),
+      user: {
+        id: currentUser.id,
+        full_name: currentUser.full_name,
+        avatar_url: currentUser.avatar_url,
+      },
+    };
+
+    // Optimistically add to timeline
+    setPosts(prev => [newPost, ...prev]);
+  };
+
+  const fetchPosts = useCallback(async (): Promise<TimelinePost[]> => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    return [
+    const mockPosts: TimelinePost[] = [
       {
         id: '1',
         content: 'Welcome to NOAI! This is your timeline where you can see posts from people you follow. The system focuses on real human connections, not algorithms.',
@@ -88,7 +110,10 @@ const Home = () => {
         },
       },
     ];
-  };
+
+    setPosts(mockPosts);
+    return mockPosts;
+  }, []);
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -109,9 +134,12 @@ const Home = () => {
             </p>
           </header>
 
+          <PostComposer user={currentUser} onPost={handleCreatePost} />
+
           <Timeline
             onUserClick={handleNavigateToProfile}
             fetchPosts={fetchPosts}
+            posts={posts}
           />
         </div>
       </main>

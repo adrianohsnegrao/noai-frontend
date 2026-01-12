@@ -16,12 +16,15 @@ interface TimelinePost {
 interface TimelineProps {
   onUserClick: (userId: string) => void;
   fetchPosts: () => Promise<TimelinePost[]>;
+  posts?: TimelinePost[];
 }
 
-const Timeline = ({ onUserClick, fetchPosts }: TimelineProps) => {
-  const [posts, setPosts] = useState<TimelinePost[]>([]);
+const Timeline = ({ onUserClick, fetchPosts, posts: externalPosts }: TimelineProps) => {
+  const [internalPosts, setInternalPosts] = useState<TimelinePost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const posts = externalPosts && externalPosts.length > 0 ? externalPosts : internalPosts;
 
   useEffect(() => {
     loadPosts();
@@ -32,7 +35,7 @@ const Timeline = ({ onUserClick, fetchPosts }: TimelineProps) => {
       setIsLoading(true);
       setError(null);
       const data = await fetchPosts();
-      setPosts(data);
+      setInternalPosts(data);
     } catch (err) {
       console.error('Error loading posts:', err);
       setError('Failed to load posts. Please try again.');
