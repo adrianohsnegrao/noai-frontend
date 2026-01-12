@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import Sidebar from '@/components/Sidebar';
 import ProfileHeader from '@/components/ProfileHeader';
 import Timeline from '@/components/Timeline';
-import { Button } from '@/components/ui/button';
 
 interface UserProfile {
   id: string;
@@ -40,8 +40,12 @@ const Profile = () => {
   const [isLoadingFollow, setIsLoadingFollow] = useState(false);
 
   // Mock current user - replace with actual auth context
-  const currentUserId = 'user-1';
-  const isOwnProfile = userId === currentUserId;
+  const currentUser = {
+    id: 'user-1',
+    full_name: 'John Doe',
+    avatar_url: undefined,
+  };
+  const isOwnProfile = userId === currentUser.id;
 
   useEffect(() => {
     fetchProfile();
@@ -106,12 +110,10 @@ const Profile = () => {
 
   // Fetch user posts
   const fetchUserPosts = async (): Promise<TimelinePost[]> => {
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800));
 
     if (!profile) return [];
 
-    // Mock posts for this user
     return [
       {
         id: '1',
@@ -150,7 +152,6 @@ const Profile = () => {
   const handleFollowToggle = async () => {
     try {
       setIsLoadingFollow(true);
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       setIsFollowing(!isFollowing);
       setStats(prev => ({
@@ -166,90 +167,83 @@ const Profile = () => {
 
   const handleEditProfile = () => {
     console.log('Navigate to edit profile');
-    // TODO: Navigate to edit profile page or open modal
   };
 
   const handleStatClick = (stat: 'posts' | 'followers' | 'following') => {
     console.log('Stat clicked:', stat);
-    // TODO: Navigate to followers/following list
   };
 
   const handleNavigateToProfile = (clickedUserId: string) => {
-    if (clickedUserId !== userId) {
-      navigate(`/profile/${clickedUserId}`);
-    }
+    navigate(`/profile/${clickedUserId}`);
   };
 
   const handleGoBack = () => {
     navigate(-1);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-destructive mb-4">User not found</p>
-          <Button variant="outline" onClick={handleGoBack}>
-            Go Back
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const handleLogout = () => {
+    console.log('Logging out...');
+    navigate('/');
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
-      <nav className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
+    <div className="min-h-screen flex bg-background">
+      <Sidebar
+        user={currentUser}
+        onNavigateToProfile={handleNavigateToProfile}
+        onLogout={handleLogout}
+      />
+
+      <main className="flex-1 min-w-0">
+        <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
+          {/* Back Button */}
+          <button
             onClick={handleGoBack}
-            className="hover:bg-muted"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground
+                     mb-6 transition-colors group"
             aria-label="Go back"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h2 className="font-semibold text-foreground">{profile.full_name}</h2>
-            <p className="text-xs text-muted-foreground">{stats.postsCount} posts</p>
-          </div>
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium">Back</span>
+          </button>
+
+          {isLoading ? (
+            <div className="space-y-6 animate-pulse">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                <div className="w-32 h-32 rounded-full bg-secondary" />
+                <div className="flex-1 space-y-4 text-center md:text-left">
+                  <div className="h-8 w-48 bg-secondary rounded mx-auto md:mx-0" />
+                  <div className="h-4 w-64 bg-secondary rounded mx-auto md:mx-0" />
+                </div>
+              </div>
+            </div>
+          ) : profile ? (
+            <div className="space-y-8">
+              <ProfileHeader
+                user={profile}
+                stats={stats}
+                isOwnProfile={isOwnProfile}
+                isFollowing={isFollowing}
+                onEditProfile={handleEditProfile}
+                onFollowToggle={handleFollowToggle}
+                onStatClick={handleStatClick}
+                isLoadingFollow={isLoadingFollow}
+              />
+
+              <section>
+                <h3 className="text-lg font-medium text-foreground mb-4">Posts</h3>
+                <Timeline
+                  onUserClick={handleNavigateToProfile}
+                  fetchPosts={fetchUserPosts}
+                />
+              </section>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">User not found</p>
+            </div>
+          )}
         </div>
-      </nav>
-
-      {/* Profile Content */}
-      <main className="max-w-2xl mx-auto px-4 py-6">
-        <ProfileHeader
-          user={profile}
-          stats={stats}
-          isOwnProfile={isOwnProfile}
-          isFollowing={isFollowing}
-          onEditProfile={handleEditProfile}
-          onFollowToggle={handleFollowToggle}
-          onStatClick={handleStatClick}
-          isLoadingFollow={isLoadingFollow}
-        />
-
-        {/* Posts Section */}
-        <section className="mt-6">
-          <h3 className="text-lg font-medium text-foreground mb-4">Posts</h3>
-          <Timeline
-            onUserClick={handleNavigateToProfile}
-            fetchPosts={fetchUserPosts}
-          />
-        </section>
       </main>
     </div>
   );
