@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { User, Search, Users, TrendingUp, Radio, LogOut, Menu, X } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Search, Users, TrendingUp, Radio, LogOut, Menu, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface SidebarProps {
@@ -13,12 +14,14 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ user, onNavigateToProfile, onLogout }: SidebarProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigationItems = [
     { icon: Users, label: 'People nearby', path: '/people-nearby' },
-    { icon: TrendingUp, label: 'Most searched people', path: '/most-searched' },
+    { icon: TrendingUp, label: 'Most searched', path: '/most-searched' },
     { icon: Radio, label: 'People live', path: '/people-live' },
   ];
 
@@ -28,9 +31,11 @@ const Sidebar = ({ user, onNavigateToProfile, onLogout }: SidebarProps) => {
   };
 
   const handleNavigationClick = (path: string) => {
-    console.log('Navigate to:', path);
+    navigate(path);
     setIsMobileMenuOpen(false);
   };
+
+  const isActivePath = (path: string) => location.pathname === path;
 
   const sidebarContent = (
     <>
@@ -75,16 +80,19 @@ const Sidebar = ({ user, onNavigateToProfile, onLogout }: SidebarProps) => {
       <nav className="flex-1 px-2 py-3 space-y-1">
         {navigationItems.map((item) => {
           const Icon = item.icon;
+          const isActive = isActivePath(item.path);
           return (
             <button
               key={item.path}
               onClick={() => handleNavigationClick(item.path)}
-              className="w-full flex items-center gap-3 px-4 py-3
-                       text-muted-foreground hover:text-foreground
-                       hover:bg-noai-surface-hover rounded-lg
-                       transition-all duration-200 group"
+              className={`w-full flex items-center gap-3 px-4 py-3
+                       rounded-lg transition-all duration-200 group
+                       ${isActive 
+                         ? 'bg-primary/10 text-primary' 
+                         : 'text-muted-foreground hover:text-foreground hover:bg-noai-surface-hover'
+                       }`}
             >
-              <Icon className="w-5 h-5 group-hover:text-primary transition-colors" />
+              <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-primary' : 'group-hover:text-primary'}`} />
               <span className="text-sm font-medium">{item.label}</span>
             </button>
           );
