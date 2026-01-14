@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/Sidebar';
+import AppHeader from '@/components/AppHeader';
 import Timeline from '@/components/Timeline';
 import PostComposer from '@/components/PostComposer';
 import { Comment } from '@/components/CommentSection';
@@ -200,8 +201,10 @@ const Home = () => {
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 min-w-0">
-        <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
+      <main className="flex-1 min-w-0 flex flex-col">
+        <AppHeader showHomeButton={false} />
+        
+        <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-6 md:py-8">
           <header className="mb-6">
             <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
               Timeline
