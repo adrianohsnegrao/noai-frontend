@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Sidebar from '@/components/Sidebar';
+import AppHeader from '@/components/AppHeader';
 
 interface DiscoveryLayoutProps {
   title: string;
@@ -37,9 +38,11 @@ const DiscoveryLayout = ({ title, subtitle, icon, children }: DiscoveryLayoutPro
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 min-h-screen">
-        <div className="max-w-2xl mx-auto px-4 py-6">
-          {/* Header */}
+      <main className="flex-1 min-h-screen flex flex-col">
+        <AppHeader />
+        
+        <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
+          {/* Page Header */}
           <div className="flex items-center gap-4 mb-6">
             <Button
               variant="ghost"
